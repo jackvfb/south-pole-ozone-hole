@@ -7,34 +7,11 @@ editor_options:
 
 ## Quarto
 
-```{r}
+```{r message=FALSE}
 library(tidyverse)
 
-targets::tar_load(processed_data)
 targets::tar_load(images)
 ```
-
-```{r}
-processed_data %>%
-  expand(date) %>%
-  group_by(year(date)) %>%
-  count()
-```
-
-How frequent are the flights over the course of the year? Could use this information to determine x-resoution of grid.
-
-```{r}
-processed_data %>%
-  expand(date) %>%
-  ggplot()+
-  geom_bar(aes(x=year(date)))+
-  facet_wrap(~month(date))
-  
-```
-
-Could as few as two flights per month, or as many as 10.
-
-More flights in the months of September-October which is the austral Spring when the ozone hole first starts forming, and before satellites are able to measure it (due to darkness in polar region). Especially critical to make these measurements via sondes at this time.
 
 Steps for making the figure:
 
@@ -53,17 +30,20 @@ Steps for making the figure:
 -   Next I will fit a KNN regression model to the training set using default hyperparameters
 -   Then I will use it to make predictions for the grid established above.
 
-```{r}
+```{r results="hide"}
 
-plotter <- function(df){
+plotter <- function(df, id){
+  
+  title <- paste("Neighbors:", str_extract(id, "(?<=_)\\d+"))
   ggplot(df) +
-  geom_tile(aes(x=jdate, y = alt, fill= ozone_ppmv))+
-  facet_wrap(~year)
+    geom_tile(aes(x=jdate, y = alt, fill = ozone_ppmv))+
+    ggtitle(title)+
+    facet_wrap(~year)
 }
 
 images %>%
   nest(data = -id) %>%
-  mutate(plots = map(data, ~plotter(.x))) %>%
+  mutate(plots = map2(data, id, ~plotter(.x, .y))) %>%
   pull(plots)
 
 
