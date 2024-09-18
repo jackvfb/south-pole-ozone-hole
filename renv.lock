@@ -94,13 +94,6 @@
       ],
       "Hash": "470851b6d5d0ac559e9d01bb352b4021"
     },
-    "RANN": {
-      "Package": "RANN",
-      "Version": "2.6.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "3c15b582f2cb4394b4b2a1ba85a1e987"
-    },
     "RColorBrewer": {
       "Package": "RColorBrewer",
       "Version": "1.1-3",
@@ -110,13 +103,6 @@
         "R"
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
-    },
-    "ROSE": {
-      "Package": "ROSE",
-      "Version": "0.0-4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c6e79999925f0db3f2d88b187d014bf8"
     },
     "Rcpp": {
       "Package": "Rcpp",
@@ -1973,30 +1959,6 @@
         "systemfonts"
       ],
       "Hash": "5142f8bc78ed3d819d26461b641627ce"
-    },
-    "themis": {
-      "Package": "themis",
-      "Version": "1.0.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "RANN",
-        "ROSE",
-        "dplyr",
-        "generics",
-        "glue",
-        "gower",
-        "hardhat",
-        "lifecycle",
-        "purrr",
-        "recipes",
-        "rlang",
-        "tibble",
-        "vctrs",
-        "withr"
-      ],
-      "Hash": "6e883e67bbc765e2dcdb9988f91f57ff"
     },
     "tibble": {
       "Package": "tibble",

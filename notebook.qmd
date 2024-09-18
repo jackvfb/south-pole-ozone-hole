@@ -9,204 +9,62 @@ editor_options:
 
 ```{r}
 library(tidyverse)
-library(tidymodels)
 
-targets::tar_load(processed_files)
+targets::tar_load(processed_data)
+targets::tar_load(images)
 ```
 
-As we can see, not all the flights reach the same altitude. The region of the hole is between the 12-24 km, so that's where we will clip the data to.
-
 ```{r}
-processed_files %>%
-  group_by(date) %>%
-  summarize(max_alt = max(alt)) %>%
-  ggplot() +
-  geom_point(aes(x=date, y = max_alt))
-```
-Around ~50 or so flights per year on average
-
-```{r}
-processed_files %>%
+processed_data %>%
   expand(date) %>%
   group_by(year(date)) %>%
   count()
 ```
+
 How frequent are the flights over the course of the year? Could use this information to determine x-resoution of grid.
 
 ```{r}
-processed_files %>%
+processed_data %>%
   expand(date) %>%
   ggplot()+
   geom_bar(aes(x=year(date)))+
   facet_wrap(~month(date))
   
 ```
+
 Could as few as two flights per month, or as many as 10.
 
 More flights in the months of September-October which is the austral Spring when the ozone hole first starts forming, and before satellites are able to measure it (due to darkness in polar region). Especially critical to make these measurements via sondes at this time.
 
-Steps for making the figure
-1) Define the grid that will be used to depict the contour plot
-- I will choose to plot values based on interval of 10 days since that would complement the less active months better
-- I will plot at altitudes every 1 km between 12 - 24 km which is the region which experiences the majority of ozone depletion during the formation of the hole.
-- I will facet the plots by year, a la NOAA GML OZWV.
+Steps for making the figure:
+
+1)  Define the grid that will be used to depict the contour plot
+
+-   I will choose to plot values based on interval of 10 days since that would complement the less active months better
+-   I will plot at altitudes every 1 km between 12 - 24 km which is the region which experiences the majority of ozone depletion during the formation of the hole.
+-   I will facet the plots by year, a la NOAA GML OZWV.
+
+2)  Prepare training data
+
+-   First I will prepare the training set from the sonde data, masking the data based on the altitudes and years required above.
+
+3)  Fit model
+
+-   Next I will fit a KNN regression model to the training set using default hyperparameters
+-   Then I will use it to make predictions for the grid established above.
 
 ```{r}
 
-# Set up grid data
-grid <- expand.grid(year = 2014:2023,
-                    jdate = seq(1, 366, by=10),
-                    alt = 10:25
-)
+plotter <- function(df){
+  ggplot(df) +
+  geom_tile(aes(x=jdate, y = alt, fill= ozone_ppmv))+
+  facet_wrap(~year)
+}
 
-```
+images %>%
+  nest(data = -id) %>%
+  mutate(plots = map(data, ~plotter(.x))) %>%
+  pull(plots)
 
-2) Prepare training data
- - First I will prepare the training set from the sonde data, masking the data based on the altitudes and years required above.
- 
-```{r}
-
-# Training data
-tr <- processed_files %>%
-  mutate(year = year(date),
-         jdate = yday(date)) %>%
-  filter(year >= 2014, year <= 2023,
-         alt >= 10, alt <= 25) %>% 
-  drop_na(ozone_ppmv) %>%
-  distinct(date, alt, .keep_all = TRUE) %>% # remove duplicate observations
-  select(year, jdate, alt, ozone_ppmv)
-
-```
- 
-3) Fit model
- - Next I will fit a KNN regression model to the training set using default hyperparameters
- - Then I will use it to make predictions for the grid established above.
- 
-```{r}
-
-# Define recipe
-knn_reg_spec <-
-  nearest_neighbor(neighbors = 5) %>%
-  set_mode("regression") %>%
-  set_engine("kknn")
-
-# Fit KNN for regression
-knn_reg_fit <- knn_reg_spec %>% fit(ozone_ppmv ~ ., data = tr)
-
-# Perform predictions
-predictions <- predict(knn_reg_fit, grid)
-
-# Attach to grid
-grid$ozone_ppmv <- predictions$.pred
-```
-
-Now for the plot:
-
-```{r}
-
-# Image grid
-y <- unique(grid$alt)
-x <- unique(grid$jdate)
-  
-img <- grid %>%
-  pivot_wider(names_from = "jdate", values_from = "ozone_ppmv") %>%
-  nest(data = -year) %>%
-  mutate(mat = map(data, \(x) x %>% select(-alt) %>% as.matrix()))
-
-map(img$mat, \(m) image(y, x, m)) 
-```
-
-
-```{r}
-d <- processed_files %>% mutate(date = as.factor(date))
-
-m <- d %>%
-  expand(date, alt) %>%
-  left_join(d, by = c("date", "alt")) %>%
-  select(date, alt, ozone_ppmv) %>%
-  pivot_wider(names_from = "date", values_from = "ozone_ppmv") %>%
-  column_to_rownames("alt") %>%
-  as.matrix()
-
-str(m)
-```
-
-In order to do this want to create a new Julian Date field so that dates are comparable to one another year to year.
-
-So I will create two fields, year and jdate, so that I can start to compare between similar days in different years. That would allow me to use other years' data to impute the missing values of ppmv.
-
-Also want to select just a handful of variables for the KNN calc.
-
-```{r}
-
-d <- processed_files %>%
-  mutate(jdate = yday(date)) %>%
-  mutate(year = year(date)) %>% 
-  select(year, jdate, press, alt, pottp, hum, o3_du, ozone_ppmv)
-  
-# perform expansion to account for missing altitudes in sonde flights
-d %>%
-  expand(year, jdate, alt) %>%
-  left_join(d, by = c("year", "jdate", "alt"))
-
-
-
-```
-
-``` {r}
-library(tidymodels)
-library(recipes)
-library(themis)  # for step_impute_knn
-
-tar_load(processed_files)
-# Assuming 'd' is your prepared dataset
-# If not, let's prepare it again:
-d <- processed_files %>%
-  mutate(jdate = yday(date),
-         year = year(date)) %>% 
-  select(year, jdate, press, alt, pottp, hum, o3_du, ozone_ppmv)
-
-# Create a complete grid of year, jdate, and alt
-complete_grid <- expand.grid(
-  year = unique(d$year),
-  jdate = unique(d$jdate),
-  alt = unique(d$alt)
-)
-
-# Join the complete grid with the existing data
-d_full <- complete_grid %>%
-  left_join(d, by = c("year", "jdate", "alt"))
-
-imputation_recipe <- recipe(ozone_ppmv ~ ., data = d_full) %>%
-  step_impute_knn(all_predictors(), neighbors = 5) %>%
-  step_impute_knn(ozone_ppmv, neighbors = 5, impute_with = c("year", "jdate", "alt", "press", "pottp", "hum", "o3_du"))
-
-imputation_prep <- prep(imputation_recipe)
-
-d_imputed <- bake(imputation_prep, new_data = d_full)
-
-anyNA(d_imputed)
-```
-
-```{r}
-ggplot(d_imputed) +
-  geom_line(aes(alt, ozone_ppmv)) +
-  facet_wrap(~jdate)
-```
-
-```{r}
-
-m <- d_imputed %>%
-  select(jdate, alt, ozone_ppmv) %>%
-  pivot_wider(names_from = "jdate", values_from = "ozone_ppmv") %>% 
-  column_to_rownames("alt") %>% 
-  as.matrix()
-
-dim(m)
-
-str(d_imputed$alt)
-str(unique(d_imputed$jdate))
-
-contour(unique(d_imputed$alt), unique(d_imputed$jdate), m)
 
 ```
