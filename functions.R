@@ -31,12 +31,15 @@ process_files <- function(file_path, min_alt, max_alt) {
   )
   
   # Add metadata
-  date <- str_extract(file_path, "(?<=_)\\d{4}_\\d{2}_\\d{2}")
-  data <- tibble(data, date = as_date(date))
+  date <- as_date(str_extract(file_path, "(?<=_)\\d{4}_\\d{2}_\\d{2}"))
+  data <- tibble(data, date = date)
   
+  # Mask altitudes
   data %>% 
     filter(alt <= max_alt,
            alt >= min_alt)
+  
+  
 }
 
 generate_grid <- function(x_res, y_res, min_alt, max_alt, years) {
@@ -45,29 +48,64 @@ generate_grid <- function(x_res, y_res, min_alt, max_alt, years) {
               year = seq(years[[1]], years[[2]], by = 1)
   )
 }
-
-train_model <- function(sonde_data, k=5){
-  # Prepare training data
-  tr <- sonde_data %>%
-    mutate(year = year(date),
-           jdate = yday(date)) %>%
-    drop_na(ozone_ppmv) %>%
-    distinct(date, alt, .keep_all = TRUE) %>%
-    select(year, jdate, alt, ozone_ppmv)
   
-  # Define and fit KNN model
-  knn_reg_spec <- nearest_neighbor(neighbors = k) %>%
+fit_model <- function(sonde_data){
+  # Prepare training data
+  sonde <- sonde_data %>%
+    # Drop observations with no response recorded
+    drop_na(ozone_ppmv) %>% 
+    # Drop repeat observations
+    distinct(date, alt, .keep_all = TRUE) %>% 
+    # Arrange chronologically for split_initial_time() in next step
+    arrange(date) %>% 
+    # Add features
+    mutate(year = year(date),
+           jdate = yday(date))
+  
+  sonde_split <- initial_time_split(sonde)
+  
+  # Define KNN model
+  knn_spec <- nearest_neighbor(
+    weight_func = "optimal",
+    neighbors = tune()) %>%
     set_mode("regression") %>%
     set_engine("kknn")
+
+  sonde_recipe <- recipe(ozone_ppmv ~ year + jdate + alt, data = sonde) %>% 
+    step_normalize(all_predictors())
   
-  knn_reg_fit <- knn_reg_spec %>% fit(ozone_ppmv ~ ., data = tr)
+  knn_wf <- workflow() %>%
+    add_model(knn_spec) %>%
+    add_recipe(sonde_recipe)
   
-  return(knn_reg_fit)
+  knn_grid <- grid_regular(
+    neighbors(range = c(1, 5)),
+    levels = 5
+  )
+  
+  sonde_folds <- vfold_cv(training(sonde_split), v = 5)
+  
+  knn_tuning <- tune_grid(
+    knn_wf,
+    resamples = sonde_folds,
+    grid = knn_grid
+  )
+  
+  best_knn <- select_best(knn_tuning, metric = "rmse")
+  
+  knn_wf <- finalize_workflow(knn_wf, best_knn)
+  
+  knn_fit <- knn_wf %>%
+    fit(sonde)
+  
+  return(knn_fit)
 }
 
-do_predictions <- function(ozone_model, grid) {
+do_predictions <- function(fitted_model, grid) {
+  
+  
   # Perform predictions
-  predictions <- predict(ozone_model, grid)
+  predictions <- predict(fitted_model, grid)
   
   # Attach predictions to grid
   grid$ozone_ppmv <- predictions$.pred
