@@ -6,7 +6,7 @@ library(dplyr)
 source("functions.R")
 
 # Define the directory where your files are located
-data_dir <- "test_data/"
+data_dir <- "data/"
 
 # Define vertical extent of interest
 min_alt <- 4
