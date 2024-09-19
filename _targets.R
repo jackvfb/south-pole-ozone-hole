@@ -9,15 +9,12 @@ source("functions.R")
 data_dir <- "test_data/"
 
 # Define vertical extent of interest
-min_alt <- 10
-max_alt <- 22
+min_alt <- 4
+max_alt <- 26
 
 #Define x and y resolution in image
 x_res <- 1 # in units of days
 y_res <- 0.1 # in units of km
-
-# Values for tar_map
-values <- list(neighbors = c(2, 5, 10))
 
 # --- BEGIN PIPELINE
 t1 <-   tar_files(
@@ -43,18 +40,14 @@ t4 <- tar_target(
   generate_grid(x_res, y_res, min_alt, max_alt, years)
   )
 
-tm <- tar_map(
-  values = values,
-  names = "neighbors",
-  tar_target(trained_model, train_model(processed_data, neighbors)),
-  tar_target(predictions, do_predictions(trained_model, grid))
-)
-
-results <- 
-  tar_combine(
-    images,
-    tm[["predictions"]],
-    command = bind_rows(!!!.x, .id = "id")
+t5 <- tar_target(
+  fitted_model,
+  fit_model(processed_data)
   )
 
-list(t1, t2, t3, t4, tm, results)
+t6 <- tar_target(
+  results,
+  do_predictions(fitted_model, grid)
+)
+
+list(t1, t2, t3, t4, t5, t6)
