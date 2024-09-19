@@ -2,6 +2,12 @@
 
 Reproducible data analysis project by Jackson Vanfleet-Brown (September 2024)
 
+# Welcome to the repository for my reproducible computational data analysis project, entitled ZZZ
+
+If you are simply interested in the results of the project, you can head over to my project notebook.
+
+If you want to use this repo to reproduce the project for yourself, the instructions are below.
+
 ## Intro
 
 The NOAA Global Monitoring Laboratory Ozone and Water Vapor research group launches ozonesondes from locations all across the planet for in-situ measurements of stratospheric ozone up to 38+ km in altitude. These devices allow them to profile the ozone layer, a vital component of our atmosphere which blocks harmful UV radiation from reaching the surface of the planet.
