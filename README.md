@@ -32,6 +32,8 @@ These instructions apply if you want to execute the analysis pipeline on your ow
 
 2) Download the raw data into the `data/` directory following the instructions provided in `data/README.md`
 
+Note: You can download a subset of the available data if you want to reduce processing time in step 5.
+
 3) Open `south-pole-ozone-hole.Rproj` to open the project in R Studio.
 
 4) Follow prompts to install the required packages.

@@ -1,7 +1,11 @@
 # Ignore raw data files
 data/*.l100
 
-# Ignore targets
+# Targets
 _targets/
+
+# Quarto output files
+*.html
+*_files/
 
 .Rproj.user
