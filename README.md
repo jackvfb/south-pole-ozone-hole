@@ -40,6 +40,6 @@ Note: You can download a subset of the available data if you want to reduce proc
 
 5) In the R Console, type the following command: `targets::tar_make()`
 
-❗Expect several hours of processing time (\~3 hrs on my machine)
+❗Processing time will vary depending on how many data files you choose to include. The time required to process 4 years worth of data is about 2 minutes on my machine.
 
 6) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`
