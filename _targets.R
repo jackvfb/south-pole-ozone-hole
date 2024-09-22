@@ -32,7 +32,7 @@ t2 <-   tar_target(
 
 t3 <- tar_target(
   years,
-  range(str_match(input_files, "(?<=_)\\d{4}"))
+  unique(str_extract(input_files, "(?<=_)\\d{4}"))
 )
 
 t4 <- tar_target(
@@ -50,4 +50,16 @@ t6 <- tar_target(
   do_predictions(fitted_model, grid)
 )
 
-list(t1, t2, t3, t4, t5, t6)
+t7 <- tar_target(
+  ozone_scale,
+  define_ozone_scale()
+)
+
+t8 <- tar_target(
+  year_plot,
+  create_year_plot(results, ozone_scale, year = years),
+  pattern = map(years),
+  iteration = "list"
+)
+
+list(t1, t2, t3, t4, t5, t6, t7, t8)
