@@ -2,6 +2,7 @@
 
 Welcome to the repository for my reproducible data analysis project.
 
+<<<<<<< HEAD
 **The objective of this project is to create a cross section of the Antarctic ozone hole using ozone sonde vertical profiles**, emulating [figures](https://gml.noaa.gov/dv/spo_oz/contours/index.php) published by the NOAA Global Monitoring Laboratory – Ozone and Water Vapor division.
 
 ## Notebook 📖
