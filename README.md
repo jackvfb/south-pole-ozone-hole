@@ -2,14 +2,13 @@
 
 Welcome to the repository for my reproducible data analysis project.
 
-<<<<<<< HEAD
 **The objective of this project is to create a cross section of the Antarctic ozone hole using ozone sonde vertical profiles**, emulating [figures](https://gml.noaa.gov/dv/spo_oz/contours/index.php) published by the NOAA Global Monitoring Laboratory – Ozone and Water Vapor division.
 
 ## Notebook 📖
 
 **Visit the project notebook for a final summary of the project, styled after a typical research paper.**
 
-## Contents 📁
+## Contents
 
 This is a summary of the key contents of the repository and what they do.
 
@@ -43,41 +42,8 @@ You must have R and R Studio installed.
 
 2) Follow prompts to install the required packages.
 
-3) In the R Console, type the following command
-
-`tar::tar_make()`
+3) In the R Console, type the following command: `targets::tar_make()`
 
 ❗Expect several hours of processing time (\~3 hrs on my machine)
 
-### Requirements
-
-You must have R and R Studio installed
-
-The NOAA Global Monitoring Laboratory Ozone and Water Vapor research group launches ozonesondes from locations all across the planet for in-situ measurements of stratospheric ozone up to 38+ km in altitude. These devices allow them to profile the ozone layer, a vital component of our atmosphere which blocks harmful UV radiation from reaching the surface of the planet.
-
-One of the locations where ozonesondes are regularly launched from is Amundsen-Scott South Pole Station, Antarctica. This is a unique station in that it is positioned under the Antarctic Ozone Hole making it a valuable data source for those monitoring the recovery of the ozone.
-
-I find this an interesting data source because the data shows the seasonal development of the ozone hole phenomenon.
-
-## Objective
-
-Recreate figures and plots using ozonesonde data:
-
-![Ozone hole figure 2022](ozmix2022.png)
-
-### Ozonesondes
-
-Ozonesonde:
-
--   Ozone: Triatomic oxygen molecule (O₃) found in Earth's atmosphere
--   Sonde: Instrument for atmospheric measurements
-
-Combined: Device for . The components of this instrument consist of:
-
-1)  🎈 **Meteorological balloon** This carries the instrument to high altitudes, before bursting and dropping the it.
-
-2)  🔋 **Electrochemical cell ozonesonde** The instrument itself uses a small air pump to bubble air into an electrochemical cell. The ozone in the air reacts with the cathode to produce electrical current proportional to the concentration of ozone in the air
-
-3)  📡 **Radiosonde** This transmits ozone measurements back to a receiver station in addition to ancillary data such as temperature, humidity, and pressure.[\^2]
-
-📈 This produces a a detailed profile of ozone concentrations it ascends and descends through the atmosphere (@fig-profile).
+4) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`
