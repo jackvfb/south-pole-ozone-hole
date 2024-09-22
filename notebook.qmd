@@ -26,34 +26,30 @@ Amundsen-Scott South Pole Station is used as a launch site for for instruments c
 
 ## Objective
 
-For this project I will be using ozonesonde vertical profiles to recreate @fig-ozmix2022, depicting a cross section of the atmosphere over South Pole Station over the course of a year. From the figure, we clearly see the ozone hole forming at ~ 14 - 22 km altitude during the months of September - November.
+Use ozonesonde vertical profiles to recreate @fig-ozmix2022, depicting a cross section of the atmosphere over South Pole Station over the course of a year.
 
-![A cross section of the atmosphere over South Pole Station, showing the time varying concentration of ozone from 2 - 26 km altitude. Created by NOAA GML Ozone and Water Vapor research group and originally published [here.](https://gml.noaa.gov/dv/spo_oz/contours/index.php)](ozmix2022.png){#fig-ozmix2022 width="70%"}
+![A cross section of the atmosphere over South Pole Station in 2022, clearly showing the ozone hole from ~ 14 - 22 km altitude during the months of September - November. Created by NOAA GML Ozone and Water Vapor research group and originally published [here.](https://gml.noaa.gov/dv/spo_oz/contours/index.php)](ozmix2022.png){#fig-ozmix2022 width="70%"}
 
-I will recreate this from the discrete vertical profiles which occur sporadically over the course of the year as shown in @fig-launches-thru-time. 
+## Methods
+
+I elected to use **nearest neighbors** to estimate ozone concentration as explained by year, Julian date, and altitude. This model was necessary because, as shown in @fig-launches-thru-time, ozonesonde observations alone were too dispersed to meet the objective.
 
 ``` {r}
+#| message: FALSE
+#| warning: FALSE
 #| label: fig-launches-thru-time
+#| fig-caption: "Ozonesonde observations in 2022 from South Pole, Antarctica."
 
-library(ggplot2)
-library(scales)
+targets::tar_load(ozone_scale)
 
 processed_data %>%
   filter(year(date) == 2022) %>% 
   ggplot() +
   geom_tile(aes(x = date, y = alt, fill = ozone_ppmv)) +
-  scale_fill_gradientn(
-    colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"),
-    trans = "log",
-    breaks = c(0.01, 0.1, 1.0, 5.0),
-    labels = c(0.01, 0.1, 1.0, 5.0),
-    limits = c(0.001, 10.0),
-    name = "ozone (ppm)"
-  ) +
+  ozone_scale +
   scale_y_continuous(breaks = seq(2, 26, by = 2)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   labs(
-    title = "Ozone Mixing Ratio over South Pole, 2022",
     x = NULL,
     y = "Altitude (km)"
   ) +
@@ -62,30 +58,13 @@ processed_data %>%
     legend.position = "right",
     panel.grid.minor = element_blank()
   )
-
 ```
 
-## Methods
+The choice of nearest neighbors was based on these considerations:
 
-### Data access
-
-The complete record of ozonesonde profiles (1968 - present) from South Pole Station, Antarctica is published by the NOAA Global Monitoring Laboratory and can be accessed, as of this writing, using the [GML Data Finder](https://gml.noaa.gov/dv/data/).
-
-Query the data finder as follows:
-
-- Category: Ozone
-- Parameter: Ozone
-- Type: Balloon
-- Frequency: Vertical Profile
-- Site: SPO
-
-The data will be returned as `.l100` files which provide ozonesonde observations in intervals of 100 m.
-
-### Estimation using nearest neighbors
-
-The launches are performed with some regularity through time, and for the purposes of visualization, it is good enough to estimate based on the launches that were closest in time.
-
-Note that the code associated with each step can be viewed in `functions.R`
+- Since there were few predictors, distance calculations between neighbors were likely to accurately reveal close relationships.
+- The launches occur with regularity throughout the year, so for most or all estimates, there were likely to be near neighbors.
+- Intuitively, for visualization purposes, it seemed to be a simple, straightforward, and potentially effective approach.
 
 #### Train/Test Split
 
@@ -93,11 +72,15 @@ The model was fit on the entire ozonesonde record up to 2021 and tested on the r
 
 #### Predictors
 
-The predictors used were year, julian date, and altitude. All predictors were normalized.
+Minimal predictors were chosen and the choices were based on these considerations:
+
+- Year: Important to associate observations that were nearby in time. Also important because of gradual ozone recovery, which is a long-term gradual shift brought about by the expiration of the CFCs that cause ozone layer destruction
+- Julian date: Also necessary to identify nearby ozonesonde observations. Also reveals seasonality of the ozone hole.
+- Altitude: A first-order estimate of ozone concentration, as the atmosphere has a stratified structure and the ozone layer is known to occur at a certain altitude range.
 
 #### Hyperparameter tuning
 
-To tune the K neighbors hypermarameter, the training set was cross validated using five folds to tune the neighbors parameter, which yielded 3 as the optimal K based chosen by best mean RMSE.
+To tune the $K$ neighbors hypermarameter, the training set was cross validated using five folds, stratified by the response variable (ppmv ozone). $K=3$ was chosen based on best mean RMSE.
 
 #### Test error
 
@@ -106,8 +89,21 @@ The test error of the fitted model was X (+ other metrics?).
 ## Results
 
 ```{r}
-# graph goes here
+targets::tar_load(year_plot, branch = 2)
 ```
+
+::: {.panel-tabset}
+
+### Recreated plot
+
+```{r}
+year_plot[[1]]
+```
+
+### Original plot
+
+![ozone 2022](ozmix2022.png)
+:::
 
 ## Discussion
 
@@ -119,86 +115,12 @@ For future improvements... ?? Do what?
 
 ## Acknowledgements
 
+
+
+## References
+
 Read more about the fascinating science behind the formation of the ozone hole [here.](https://gml.noaa.gov/dv/spo_oz/)
 
 Read more about the pollutants that cause the ozone hole -- and the global effort to reduce them in order to reverse the destruction of the ozone layer -- [here.](https://gml.noaa.gov/hats/about/cfc.html)
 
 For detailed instructions on how to prepare and launch an ozonesonde, [check out the manual and videos given by Patrick Cullis.](https://patrickcullis.com/ozonesonde-instructions.html)
-
-
-## References
-
-### To reproduce the analysis:
-
-Use the targets package to build a pipeline from data to finished images. The data is accessible from here and you can download the whole directory.
-
-From there, you will need R and R Studio installed on your machine.
-
-You then should clone this repo and open the .Rproj associated with the project. Renv is a package management that should prompt you to install the required packages automatically. Once that is done, you can simply run this command in the console: tar_make()
-
--   Note: Expect this pipeline to take several hours (\~3 on my machine) to execute as it will fit the model and use it to make the predictions.
-
-This will generate all the processed data and results. If you want to re-render the figures in this notebook, you will need to also have Quarto installed. Then from the command line you would run "quarto render".
-
-
-## Acknowledgements
-
-
-### The South Pole?
-
-
-### nXXX
-
-Steps for making the figure:
-
-1)  Define the grid that will be used to depict the contour plot
-
--   I will choose to plot values based on interval of 10 days since that would complement the less active months better
--   I will plot at altitudes every 1 km between 12 - 24 km which is the region which experiences the majority of ozone depletion during the formation of the hole.
--   I will facet the plots by year, a la NOAA GML OZWV.
-
-2)  Prepare training data
-
--   First I will prepare the training set from the sonde data, masking the data based on the altitudes and years required above.
-
-3)  Fit model
-
--   Next I will fit a KNN regression model to the training set using default hyperparameters
--   Then I will use it to make predictions for the grid established above.
-
-```{r results="hide"}
-
-# 
-# plotter <- function(df, id){
-#   
-#   title <- paste("Neighbors:", str_extract(id, "(?<=_)\\d+"))
-#   ggplot(df) +
-#     geom_tile(aes(x=jdate, y = alt, fill = ozone_ppmv))+
-#     ggtitle(title)+
-#     facet_wrap(~year)
-# }
-# 
-# images %>%
-#   nest(data = -id) %>%
-#   mutate(plots = map2(data, id, ~plotter(.x, .y))) %>%
-#   pull(plots)
-
-
-```
-
-
-```{r}
-#| label: fig-profile
-#| fig-caption: "An example of a vertical profile showing ozone concentrations from the ground up to altitudes of ~ 40 km."
-
-ggplot()+
-  geom_path(data = filter(processed_data,
-                          date == "2022-10-11"),
-            aes(x=ozone_ppmv, y=alt),
-            color='red')+
-  geom_path(data = filter(processed_data,
-                          date == "2022-03-20"),
-            aes(x=ozone_ppmv, y=alt),
-            color='green')
-
-```

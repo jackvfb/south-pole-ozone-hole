@@ -6,7 +6,6 @@ process_files <- function(file_path, min_alt, max_alt) {
   col_names = c("level", "press", "alt", "pottp", "temp", "ftempv", "hum", "ozone", "ozone_ppmv", "ozone_atmcm", "ptemp", "o3_density", "o3_du", "o3_uncert")
   na_vals <- c("999.9", "999", "99.90", "99.999", "99.9990", "999.999", "9999", "99999.000", "99999")
   
-  # Read the numerical data
   data <- read_table(
     file_path, 
     skip = 29,
@@ -45,7 +44,7 @@ process_files <- function(file_path, min_alt, max_alt) {
 generate_grid <- function(x_res, y_res, min_alt, max_alt, years) {
   expand.grid(alt = seq(min_alt, max_alt, by = y_res),
               jdate = seq(1, 366, by = x_res),
-              year = seq(years[[1]], years[[2]], by = 1)
+              year = min(years):max(years)
   )
 }
   
@@ -111,4 +110,31 @@ do_predictions <- function(fitted_model, grid) {
   grid$ozone_ppmv <- predictions$.pred
   
   return(grid)
+}
+
+create_year_plot <- function(results, ozone_scale, year) {
+  year_data <- results %>%
+    filter(year == {{year}})
+  
+  plot <- ggplot(year_data,
+                 aes(x = jdate, y = alt, fill = ozone_ppmv + 0.01)) +
+    geom_tile() +
+    ozone_scale +
+    labs(title = paste("Ozone Concentration in", year),
+         x = "Day of Year",
+         y = "Altitude (km)") +
+    theme_minimal()
+  
+  return(plot)
+}
+
+define_ozone_scale <- function(){
+  scale_fill_gradientn(
+    colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"),
+    breaks = c(0.01, 0.1, 1.0, 5.0),
+    labels = c(0.01, 0.1, 1.0, 5.0),
+    limits = c(0.01, 8),
+    trans = "log",
+    name = "ozone (ppm)"
+  )
 }
