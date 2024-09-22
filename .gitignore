@@ -1,4 +1,7 @@
-data/
-test_data/
+# Ignore raw data files
+data/*.l100
+
+# Ignore targets
 _targets/
+
 .Rproj.user

@@ -28,18 +28,16 @@ Along with `renv.lock` this captures the requirements that are needed to set up 
 
 These instructions apply if you want to execute the analysis pipeline on your own machine, for example if you wanted to examine the model or processed data.
 
-### Requirements
+1) You must have R and R Studio installed.
 
-You must have R and R Studio installed.
+2) Download the raw data into the `data/` directory following the instructions provided in `data/README.md`
 
-1) Download the raw data into the `data/` directory following the instructions provided in `data/README.md`
+3) Open `south-pole-ozone-hole.Rproj` to open the project in R Studio.
 
-2) Open `south-pole-ozone-hole.Rproj` to open the project in R Studio.
+4) Follow prompts to install the required packages.
 
-3) Follow prompts to install the required packages.
-
-4) In the R Console, type the following command: `targets::tar_make()`
+5) In the R Console, type the following command: `targets::tar_make()`
 
 ❗Expect several hours of processing time (\~3 hrs on my machine)
 
-5) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`
+6) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`
