@@ -12,20 +12,16 @@ Welcome to the repository for my reproducible data analysis project.
 
 This is a summary of the key contents of the repository and what they do.
 
-📄`functions.R`
-
+- 📄`functions.R`
 The core methodology and logic of the project, encapsulated in these functions.
 
-📄`_targets.R`
-
+- 📄`_targets.R`
 The pipeline that performs the analysis by calling the functions above.
 
-📂`data/`
-
+- 📂`data/`
 This contains the raw data, with instructions on how to access it in `data/README.md`
 
-📂`renv/`
-
+- 📂`renv/`
 Along with `renv.lock` this captures the requirements that are needed to set up the environment.
 
 ## Instructions
@@ -38,12 +34,12 @@ You must have R and R Studio installed.
 
 1) Download the raw data into the `data/` directory following the instructions provided in `data/README.md`
 
-1) Open `south-pole-ozone-hole.Rproj` to open the project in R Studio.
+2) Open `south-pole-ozone-hole.Rproj` to open the project in R Studio.
 
-2) Follow prompts to install the required packages.
+3) Follow prompts to install the required packages.
 
-3) In the R Console, type the following command: `targets::tar_make()`
+4) In the R Console, type the following command: `targets::tar_make()`
 
 ❗Expect several hours of processing time (\~3 hrs on my machine)
 
-4) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`
+5) When the pipeline finishes, you can access any of the targets using the command `targets::tar_load(target_name)`

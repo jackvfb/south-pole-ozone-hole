@@ -1,8 +1,10 @@
-# Ozone sonde vertical profiles
+# Ozonesonde vertical profiles from South Pole, Antarctica
+
+Welcome to the raw data directory associated with this project.
 
 ## Instructions
 
-Ozonesonde vertical profiles from South Pole Station, Antarctica are published by the NOAA Global Monitoring Laboratory and can be accessed, as of this writing, using the [GML Data Finder](https://gml.noaa.gov/dv/data/).
+These data are published by the NOAA Global Monitoring Laboratory and can be accessed, as of this writing, using the [GML Data Finder](https://gml.noaa.gov/dv/data/).
 
 Query the data finder as follows:
 
