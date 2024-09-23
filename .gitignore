@@ -1,5 +1,8 @@
 # Ignore raw data files
 data/*.l100
+all_data/
+
+junk/
 
 # Targets
 _targets/
