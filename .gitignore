@@ -2,13 +2,16 @@
 data/*.l100
 all_data/
 
+# Ignore quarto render output files
+*.html
+*_files/
+_site/
+
 junk/
 
 # Targets
 _targets/
 
-# Quarto output files
-*.html
-*_files/
-
 .Rproj.user
+
+/.quarto/

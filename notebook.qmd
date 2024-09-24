@@ -3,10 +3,9 @@ title: "Using ozonesondes to observe the Antarctic ozone hole"
 subtitle: "A reproducible data analysis project"
 author: "Jackson Vanfleet-Brown"
 date: last-modified
-format: html
 echo: false
-editor_options: 
-  chunk_output_type: inline
+format: html
+toc: true
 ---
 
 ```{r message=FALSE}
