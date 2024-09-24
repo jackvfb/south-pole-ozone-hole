@@ -4,9 +4,8 @@ subtitle: "A reproducible data analysis project"
 author: "Jackson Vanfleet-Brown"
 date: last-modified
 echo: false
-format:
-  html:
-    toc: true
+format: html
+toc: true
 ---
 
 ```{r message=FALSE}
