@@ -5,10 +5,7 @@ author: "Jackson Vanfleet-Brown"
 date: last-modified
 echo: false
 toc: true
-format:
-  html:
-    embed-resources: true
-    output-file: index.html
+format: html
 ---
 
 ```{r message=FALSE}

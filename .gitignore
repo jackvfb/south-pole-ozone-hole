@@ -2,6 +2,10 @@
 data/*.l100
 all_data/
 
+# Ignore quarto render output files
+*.html
+*_files/
+
 junk/
 
 # Targets
