@@ -6,7 +6,7 @@ Welcome to the repository for my reproducible data analysis project.
 
 ## Notebook 📖
 
-Visit the [project notebook](https://jackvfb.github.io/south-pole-ozone-hole/) for a final summary of the project, styled after a typical research paper.
+Visit the [project notebook](https://jackvfb.github.io/south-pole-ozone-hole/index.html) for a final summary of the project, styled after a typical research paper.
 
 ## Contents
 
