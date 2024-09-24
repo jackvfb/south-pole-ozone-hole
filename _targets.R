@@ -19,7 +19,7 @@ y_res <- 0.1 # in units of km
 # --- BEGIN PIPELINE
 t1 <-   tar_files(
     name = input_files,
-    command = list.files(data_dir, full.names = TRUE)
+    command = list.files(data_dir, pattern = "\\.l100", full.names = TRUE)
   )
 
 t2 <-   tar_target(
